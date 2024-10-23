@@ -57,7 +57,7 @@ def end_round():
     # Get the current timestamp using Python's datetime module
     current_timestamp = datetime.now()
 
-    # Save to database
+    # Save to a database
     conn = sqlite3.connect('rounds.db')
     cursor = conn.cursor()
     cursor.execute('''
