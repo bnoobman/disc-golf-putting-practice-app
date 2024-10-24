@@ -1,0 +1,17 @@
+body {
+    font-size: 0.875rem;
+}
+
+.sidebar {
+    background-color: #f8f9fa;
+    height: 100vh;
+}
+
+.sidebar .nav-link {
+    font-weight: 500;
+    color: #333;
+}
+
+.sidebar .nav-link:hover {
+    color: #0657b1;
+}
