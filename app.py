@@ -1,22 +1,36 @@
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 import mysql.connector  # MariaDB connector
+from config import DevelopmentConfig, ProductionConfig, TestingConfig
+import os
+
+from dotenv import load_dotenv
+load_dotenv()  # Automatically loads environment variables from .env
 
 app = Flask(__name__)
 
-# Configuration for MariaDB
-db_config = {
-    'host': 'localhost',    # Update with your host
-    'user': 'root',     # Update with your username
-    'password': 'poopnugs69?',  # Update with your password
-    'database': 'putt_tracker_db', # Update with your database name
-    'charset': 'utf8mb4',    # Use utf8mb4 for wide Unicode support
-    'collation': 'utf8mb4_general_ci'  # A compatible collation for MariaDB
-}
+# Choose the configuration based on the environment
+environment = os.environ.get('FLASK_ENV', 'development')
 
-# Function to initialize the database
+if environment == 'development':
+    app.config.from_object(DevelopmentConfig())
+elif environment == 'production':
+    app.config.from_object(ProductionConfig())
+elif environment == 'testing':
+    app.config.from_object(TestingConfig())
+else:
+    app.config.from_object(DevelopmentConfig())  # Default to development
+
+# Function to initialize the database using the app's configuration
 def init_db():
-    conn = mysql.connector.connect(**db_config)
+    conn = mysql.connector.connect(
+        host=app.config['DB_HOST'],
+        user=app.config['DB_USER'],
+        password=app.config['DB_PASSWORD'],
+        database=app.config['DB_NAME'],
+        charset=app.config['DB_CHARSET'],
+        collation=app.config['DB_COLLATION']
+    )
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS rounds (
@@ -63,7 +77,14 @@ def end_round():
     current_timestamp = datetime.now()
 
     # Save to the database
-    conn = mysql.connector.connect(**db_config)
+    conn = mysql.connector.connect(
+        host=app.config['DB_HOST'],
+        user=app.config['DB_USER'],
+        password=app.config['DB_PASSWORD'],
+        database=app.config['DB_NAME'],
+        charset='utf8mb4',  # Set charset to utf8mb4
+        collation='utf8mb4_general_ci'  # Explicitly set the collation
+    )
     cursor = conn.cursor()
     cursor.execute('''
         INSERT INTO rounds (makes, misses, distance, timestamp) 
@@ -77,7 +98,14 @@ def end_round():
 
 @app.route('/rounds')
 def show_rounds():
-    conn = mysql.connector.connect(**db_config)
+    conn = mysql.connector.connect(
+        host=app.config['DB_HOST'],
+        user=app.config['DB_USER'],
+        password=app.config['DB_PASSWORD'],
+        database=app.config['DB_NAME'],
+        charset='utf8mb4',  # Set charset to utf8mb4
+        collation='utf8mb4_general_ci'  # Explicitly set the collation
+    )
     cursor = conn.cursor()
 
     # Fetch the id, makes, misses, distance, and timestamp from the database
@@ -90,7 +118,14 @@ def show_rounds():
 
 @app.route('/round/<int:round_id>')
 def round_detail(round_id):
-    conn = mysql.connector.connect(**db_config)
+    conn = mysql.connector.connect(
+        host=app.config['DB_HOST'],
+        user=app.config['DB_USER'],
+        password=app.config['DB_PASSWORD'],
+        database=app.config['DB_NAME'],
+        charset='utf8mb4',  # Set charset to utf8mb4
+        collation='utf8mb4_general_ci'  # Explicitly set the collation
+    )
     cursor = conn.cursor()
 
     # Fetch the specific round using its ID
@@ -123,7 +158,14 @@ def round_detail(round_id):
 
 @app.route('/stats')
 def stats():
-    conn = mysql.connector.connect(**db_config)
+    conn = mysql.connector.connect(
+        host=app.config['DB_HOST'],
+        user=app.config['DB_USER'],
+        password=app.config['DB_PASSWORD'],
+        database=app.config['DB_NAME'],
+        charset='utf8mb4',  # Set charset to utf8mb4
+        collation='utf8mb4_general_ci'  # Explicitly set the collation
+    )
     cursor = conn.cursor()
 
     # Query to group rounds by distance and calculate total putts, makes, and misses
@@ -159,4 +201,4 @@ def stats():
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True)
+    app.run()
