@@ -1,0 +1,167 @@
+/* Base Styles */
+body {
+    font-size: 1rem;
+    font-family: 'Roboto', sans-serif; /* Modern, clean font */
+    background-color: #f4f7fa; /* Light background for modern look */
+    color: #333; /* Darker text color for readability */
+    line-height: 1.6; /* Better line spacing */
+}
+
+.container {
+    max-width: 1200px; /* Restrict container width */
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header Styles */
+h1, h3 {
+    font-family: 'Roboto Slab', serif; /* Add a contrasting serif font for headers */
+    font-weight: 700;
+    color: #007bff; /* Primary color for headers */
+}
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+h3 {
+    font-size: 1.5rem;
+    margin-top: 40px;
+}
+
+/* Form Styles */
+.form-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.form-select {
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    transition: border-color 0.2s ease;
+}
+
+.form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Button Styles */
+button {
+    border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+    transform: translateY(-2px); /* Subtle lift effect */
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+}
+
+/* Link Styles */
+a {
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: #0056b3;
+}
+
+/* Stats Section */
+#roundStats {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 10px;
+    color: #495057;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    background-color: #343a40;
+    color: #adb5bd;
+    padding-top: 20px;
+    height: 100vh;
+    position: fixed;
+    width: 240px;
+    transition: all 0.3s ease;
+}
+
+.sidebar .nav-link {
+    color: #adb5bd;
+    padding: 10px 20px;
+    font-weight: 500;
+    display: block;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #495057;
+    color: white;
+}
+
+.sidebar .nav-link.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.main-content {
+    margin-left: 240px;
+    padding: 20px;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .form-select {
+        width: 100%;
+    }
+
+    button {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    #roundStats {
+        text-align: center;
+    }
+}
