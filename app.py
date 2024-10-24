@@ -156,6 +156,30 @@ def round_detail(round_id):
     else:
         return "Round not found", 404
 
+
+@app.route('/delete_round/<int:round_id>', methods=['POST'])
+def delete_round(round_id):
+    # Connect to the database
+    conn = mysql.connector.connect(
+        host=app.config['DB_HOST'],
+        user=app.config['DB_USER'],
+        password=app.config['DB_PASSWORD'],
+        database=app.config['DB_NAME'],
+        charset='utf8mb4',  # Set charset to utf8mb4
+        collation='utf8mb4_general_ci'  # Explicitly set the collation
+    )
+    cursor = conn.cursor()
+
+    # Execute the DELETE SQL statement
+    cursor.execute('DELETE FROM rounds WHERE id = %s', (round_id,))
+    conn.commit()
+
+    # Close the connection
+    cursor.close()
+    conn.close()
+
+    return 'Round deleted!'
+
 @app.route('/stats')
 def stats():
     conn = mysql.connector.connect(
