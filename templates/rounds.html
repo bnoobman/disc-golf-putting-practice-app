@@ -7,39 +7,70 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="container mt-5">
-        <h1 class="text-center">Disc Golf Putting Rounds</h1>
+<div class="container mt-5">
+    <h1 class="text-center">Disc Golf Putting Rounds</h1>
 
-        <table class="table table-bordered table-striped mt-4">
-            <thead>
-                <tr>
-                    <th>Timestamp</th>
-                    <th>Makes</th>
-                    <th>Misses</th>
-                    <th>Distance (ft)</th>
+    <table class="table table-bordered table-striped mt-4">
+        <thead>
+        <tr>
+            <th>Timestamp</th>
+            <th>Makes</th>
+            <th>Misses</th>
+            <th>Distance (ft)</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if rounds %}
+            {% for round in rounds %}
+                <tr onclick="window.location.href='/round/{{ round[0] }}'">
+                    <td>{{ round[4] }}</td>  <!-- Timestamp -->
+                    <td>{{ round[1] }}</td>  <!-- Makes -->
+                    <td>{{ round[2] }}</td> <!-- Misses -->
+                    <td>{{ round[3] }} ft</td>  <!-- Distance -->
+                    <td>
+                        <!-- Call deleteRound JS function on form submission -->
+                        <form action="{{ url_for('delete_round', round_id=round[0]) }}" method="POST"
+                              onsubmit="deleteRound(event, this)">
+                            <button type="submit" class="btn btn-danger" onclick="event.stopPropagation();">Delete
+                            </button>
+                        </form>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                {% if rounds %}
-                    {% for round in rounds %}
-                        <tr onclick="window.location.href='/round/{{ round[0] }}'">
-                            <td>{{ round[4] }}</td>  <!-- Timestamp -->
-                            <td>{{ round[1] }}</td>  <!-- Makes -->
-                            <td>{{ round[2] }}</td> <!-- Misses -->
-                            <td>{{ round[3] }} ft</td>  <!-- Distance -->
-                        </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="4" class="text-center">No rounds recorded yet.</td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="5" class="text-center">No rounds recorded yet.</td>
+            </tr>
+        {% endif %}
+        </tbody>
+    </table>
 
-        <div class="text-center mt-4">
-            <a href="/" class="btn btn-primary">Back to Home</a>
-        </div>
+    <div class="text-center mt-4">
+        <a href="/stats" class="btn btn-primary">Statistics</a>
+        <a href="/" class="btn btn-primary">Home</a>
     </div>
+</div>
 </body>
+<script>
+    function deleteRound(event, form) {
+        event.preventDefault();  // Prevent default form submission
+
+        if (confirm('Are you sure you want to delete this round?')) {
+            // Perform the AJAX request to delete the round
+            fetch(form.action, {
+                method: 'POST'
+            }).then(response => {
+                if (response.ok) {
+                    alert('Round deleted!');
+                    window.location.href = '/rounds';  // Redirect back to rounds page
+                } else {
+                    alert('Error: Could not delete the round.');
+                }
+            }).catch(error => {
+                alert('Error: ' + error.message);
+            });
+        }
+    }
+</script>
 </html>

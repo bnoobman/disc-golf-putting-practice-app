@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distance Statistics</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center">Statistics for {{ distance }} ft</h1>
+
+    <div class="text-center mt-5">
+        <h3>Total Makes vs Misses</h3>
+        <img src="data:image/png;base64,{{ pie_chart_data }}" alt="Pie Chart" class="img-fluid">
+    </div>
+
+    <div class="text-center">
+        <h3>Makes Over Time</h3>
+        <img src="data:image/png;base64,{{ makes_line_chart_data }}" alt="Makes Line Chart" class="img-fluid">
+    </div>
+
+    <div class="text-center mt-5">
+        <h3>Misses Over Time</h3>
+        <img src="data:image/png;base64,{{ misses_line_chart_data }}" alt="Misses Line Chart" class="img-fluid">
+    </div>
+
+    <div class="text-center mt-5">
+        <a href="/stats" class="btn btn-primary">Back to Statistics</a>
+        <a href="/rounds" class="btn btn-primary">To Rounds</a>
+        <a href="/" class="btn btn-primary">Home</a>
+    </div>
+</div>
+</body>
+</html>
