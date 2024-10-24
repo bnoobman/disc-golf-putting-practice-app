@@ -1,34 +1,41 @@
 from datetime import datetime
-
 from flask import Flask, render_template, request, jsonify, redirect, url_for
-import sqlite3
+import mysql.connector  # MariaDB connector
 
 app = Flask(__name__)
 
+# Configuration for MariaDB
+db_config = {
+    'host': 'localhost',    # Update with your host
+    'user': 'root',     # Update with your username
+    'password': 'poopnugs69?',  # Update with your password
+    'database': 'putt_tracker_db', # Update with your database name
+    'charset': 'utf8mb4',    # Use utf8mb4 for wide Unicode support
+    'collation': 'utf8mb4_general_ci'  # A compatible collation for MariaDB
+}
 
 # Function to initialize the database
 def init_db():
-    conn = sqlite3.connect('rounds.db')
+    conn = mysql.connector.connect(**db_config)
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS rounds (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            makes INTEGER NOT NULL,
-            misses INTEGER NOT NULL,
-            distance INTEGER NOT NULL,
-            timestamp DATETIME 
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            makes INT NOT NULL,
+            misses INT NOT NULL,
+            distance INT NOT NULL,
+            timestamp DATETIME
         )
     ''')
     conn.commit()
+    cursor.close()
     conn.close()
-
 
 # Route for the homepage
 @app.route('/')
 def index():
     distances = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70]  # Predefined distances
     return render_template('index.html', distances=distances)
-
 
 # Route to add a make
 @app.route('/add_make', methods=['POST'])
@@ -37,14 +44,12 @@ def add_make():
     current_round['makes'] += 1
     return jsonify(current_round)
 
-
 # Route to add a miss
 @app.route('/add_miss', methods=['POST'])
 def add_miss():
     current_round = request.json['current_round']
     current_round['misses'] += 1
     return jsonify(current_round)
-
 
 # Route to end a round and save it to the database
 @app.route('/end_round', methods=['POST'])
@@ -57,40 +62,41 @@ def end_round():
     # Get the current timestamp using Python's datetime module
     current_timestamp = datetime.now()
 
-    # Save to a database
-    conn = sqlite3.connect('rounds.db')
+    # Save to the database
+    conn = mysql.connector.connect(**db_config)
     cursor = conn.cursor()
     cursor.execute('''
         INSERT INTO rounds (makes, misses, distance, timestamp) 
-        VALUES (?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s)
     ''', (makes, misses, distance, current_timestamp))
     conn.commit()
+    cursor.close()
     conn.close()
 
     return jsonify({'status': 'Round saved!'})
 
-
 @app.route('/rounds')
 def show_rounds():
-    conn = sqlite3.connect('rounds.db')
+    conn = mysql.connector.connect(**db_config)
     cursor = conn.cursor()
 
     # Fetch the id, makes, misses, distance, and timestamp from the database
     cursor.execute('SELECT id, makes, misses, distance, timestamp FROM rounds ORDER BY timestamp DESC')
     rounds = cursor.fetchall()
+    cursor.close()
     conn.close()
 
     return render_template('rounds.html', rounds=rounds)
 
-
 @app.route('/round/<int:round_id>')
 def round_detail(round_id):
-    conn = sqlite3.connect('rounds.db')
+    conn = mysql.connector.connect(**db_config)
     cursor = conn.cursor()
 
     # Fetch the specific round using its ID
-    cursor.execute('SELECT makes, misses, distance, timestamp FROM rounds WHERE id = ?', (round_id,))
+    cursor.execute('SELECT makes, misses, distance, timestamp FROM rounds WHERE id = %s', (round_id,))
     round_data = cursor.fetchone()
+    cursor.close()
     conn.close()
 
     if round_data:
@@ -115,10 +121,9 @@ def round_detail(round_id):
     else:
         return "Round not found", 404
 
-
 @app.route('/stats')
 def stats():
-    conn = sqlite3.connect('rounds.db')
+    conn = mysql.connector.connect(**db_config)
     cursor = conn.cursor()
 
     # Query to group rounds by distance and calculate total putts, makes, and misses
@@ -129,6 +134,7 @@ def stats():
         ORDER BY distance ASC
     ''')
     stats_data = cursor.fetchall()
+    cursor.close()
     conn.close()
 
     # Process the data and calculate percentages
@@ -150,7 +156,6 @@ def stats():
 
     # Pass the accumulated statistics to the stats.html template
     return render_template('stats.html', stats=stats_summary)
-
 
 if __name__ == '__main__':
     init_db()
