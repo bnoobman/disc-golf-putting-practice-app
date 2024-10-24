@@ -3,6 +3,9 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for
 import mysql.connector  # MariaDB connector
 from config import DevelopmentConfig, ProductionConfig, TestingConfig
 import os
+import matplotlib.pyplot as plt
+import io
+import base64
 
 from dotenv import load_dotenv
 load_dotenv()  # Automatically loads environment variables from .env
@@ -222,6 +225,95 @@ def stats():
 
     # Pass the accumulated statistics to the stats.html template
     return render_template('stats.html', stats=stats_summary)
+
+
+@app.route('/distance/<int:distance>')
+def distance_detail(distance):
+    conn = mysql.connector.connect(
+        host=app.config['DB_HOST'],
+        user=app.config['DB_USER'],
+        password=app.config['DB_PASSWORD'],
+        database=app.config['DB_NAME'],
+        charset='utf8mb4',
+        collation='utf8mb4_general_ci'
+    )
+    cursor = conn.cursor()
+
+    # Query to fetch rounds for the specified distance
+    cursor.execute('''
+        SELECT makes, misses, timestamp FROM rounds
+        WHERE distance = %s
+        ORDER BY timestamp ASC
+    ''', (distance,))
+    rounds = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    # Prepare data for the two line charts
+    timestamps = [row[2] for row in rounds]
+    makes = [row[0] for row in rounds]
+    misses = [row[1] for row in rounds]
+
+    total_makes = sum(makes)
+    total_misses = sum(misses)
+
+    # --- First Line Chart for Makes per Round over Time ---
+    fig, ax = plt.subplots()
+    ax.plot(timestamps, makes, label='Makes', color='green', marker='o')
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Makes per Round')
+    ax.set_title(f'Makes Over Time at {distance}ft')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+
+    # Convert first line chart (Makes) to base64 string
+    makes_line_chart_img = io.BytesIO()
+    plt.savefig(makes_line_chart_img, format='png')
+    plt.close(fig)
+    makes_line_chart_img.seek(0)
+    makes_line_chart_data = base64.b64encode(makes_line_chart_img.getvalue()).decode('utf-8')
+
+    # --- Second Line Chart for Misses per Round over Time ---
+    fig, ax = plt.subplots()
+    ax.plot(timestamps, misses, label='Misses', color='red', marker='o')
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Misses per Round')
+    ax.set_title(f'Misses Over Time at {distance}ft')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+
+    # Convert second line chart (Misses) to base64 string
+    misses_line_chart_img = io.BytesIO()
+    plt.savefig(misses_line_chart_img, format='png')
+    plt.close(fig)
+    misses_line_chart_img.seek(0)
+    misses_line_chart_data = base64.b64encode(misses_line_chart_img.getvalue()).decode('utf-8')
+
+    # --- Pie Chart for Total Makes vs Misses ---
+    fig, ax = plt.subplots()
+    ax.pie([total_makes, total_misses], labels=['Makes', 'Misses'], autopct='%1.1f%%', startangle=90, colors=['green', 'red'])
+    ax.set_title(f'Makes vs Misses at {distance}ft')
+
+    # Convert pie chart to base64 string
+    pie_chart_img = io.BytesIO()
+    plt.tight_layout()
+    plt.savefig(pie_chart_img, format='png')
+    plt.close(fig)
+    pie_chart_img.seek(0)
+    pie_chart_data = base64.b64encode(pie_chart_img.getvalue()).decode('utf-8')
+
+    # Render the template with both line charts and the pie chart
+    return render_template('distance_detail.html',
+                           distance=distance,
+                           total_makes=total_makes,
+                           total_misses=total_misses,
+                           makes_line_chart_data=makes_line_chart_data,
+                           misses_line_chart_data=misses_line_chart_data,
+                           pie_chart_data=pie_chart_data)
+
+
+
 
 if __name__ == '__main__':
     init_db()
